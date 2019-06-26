@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HighChart</title>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+</head>
+<body>
+
+<div id="container">
+
+    <div id="inputOchTabell">
+        <input type="number" id="arrivalrate" placeholder="Arrivalrate">
+        <label>Arrivalrate: kunder/timme</label>
+        <br>
+        <input type="number" id="servicerate" placeholder="Servicerate">
+        <label>Servicerate: kunder/timme</label>
+        <br>
+        <button class="btn btn-outline-success" onclick="addToChart()">Lägg till punkt</button>
+
+
+        <table class="table table-striped" id="tabell">
+            <tr>
+                <th>Medel: antal kunder i kön</th>
+                <th>Medel: antal kunder i systemet</th>
+                <th>Väntetid i systemet</th>
+                <th>Väntetid i kö</th>
+                <th>Upptagen att betjäna</th>
+                <th>Chans ingen i kön</th>
+            </tr>
+            <tr>
+                <td id="medelIKo"></td>
+                <td id="medelISystem"></td>
+                <td id="vanteTidISystem"></td>
+                <td id="vanteTidIKo"></td>
+                <td id="upptagenAttBetjana"></td>
+                <td id="chansKoArTom"></td>
+            </tr>
+
+        </table>
+    </div>
+
+    <!--
+    <label for="nyPunkt">Ny punkt</label>
+    <input type="number" id="nyPunkt">
+    <button class="btn btn-outline-primary" onclick="addToChart()">Lägg till punkt</button>
+    -->
+
+    <br>
+
+    <div id="myChart">
+    </div>
+
+</div>
+
+<script>
+    let myChart = new Highcharts.chart('myChart', {
+        title: {
+            text: 'Köberäkning'
+        },
+        yAxis: {
+            title: {
+                text: 'Antal kunder i kö'
+            }
+        },
+        xAxis: {
+            title: {
+                text: 'Arrivaalrates: antal kunder per timme'
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+        plotOptions:{
+            series: {
+                pointStart: 1,
+                pointInterval: 5
+            }
+        },
+        series:[{
+            name: 'medel, kunder i kö',
+            data: []
+        }, {
+            name: 'medel, kunder i system',
+            data: []
+        }]
+    });
+
+
+    function addToChart() {
+        //Lägger till data i tabell
+        let arrivalrate = document.getElementById('arrivalrate').value;
+        let servicerate = document.getElementById('servicerate').value;
+
+
+        let medelIKo = (arrivalrate * arrivalrate) / (servicerate * (servicerate - arrivalrate));
+        let medelISystem = arrivalrate/(servicerate - arrivalrate);
+
+        let vanteTidISystem = 60 / (servicerate - arrivalrate);
+        let vanteTidIKo = 60 * (arrivalrate / (servicerate * (servicerate - arrivalrate)));
+
+        let upptagenAttBetjana = arrivalrate / servicerate;
+        let chansKoArTom = 1 - (arrivalrate / servicerate);
+
+
+        $("#tabell").append("<tr><td>" + medelIKo + "</td>" +
+        "<td>" + medelISystem + "</td>" +
+        "<td>" + vanteTidISystem + "</td>" +
+        "<td>" + vanteTidIKo + "</td>" +
+        "<td>" + upptagenAttBetjana + "%</td>" +
+        "<td>" + chansKoArTom + "%</td></tr>");
+
+        //Lägger ut punkter
+        myChart.series[0].addPoint(parseInt(medelIKo));
+        myChart.series[1].addPoint(parseInt(medelISystem));
+    }
+
+
+    $(document).ready(function () {
+
+    });
+
+</script>
+
+</body>
+</html>
